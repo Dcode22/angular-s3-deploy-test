@@ -1,0 +1,36 @@
+name: Deploy to AWS S3
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch; change as needed
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'  # Specify your Node.js version
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Build Angular Project
+      run: npm run build -- --prod
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: 'us-east-1'  # Specify your AWS region
+
+    - name: Deploy to S3
+      run: aws s3 sync ./dist/aws-test s3://angular-first-deploy --delete
+
